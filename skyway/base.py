@@ -21,7 +21,20 @@ class BaseQuerySettings:
         return "".join(msg) + ";"
 
 
+class OSMElement():
+    pass
 
+
+class Node(OSMElement):
+    _type = "node"
+
+
+class Way(OSMElement):
+    _type = "way"
+
+
+class Relation(OSMElement):
+    _type = "relation"
 
 
 
