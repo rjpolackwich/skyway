@@ -1,0 +1,11 @@
+numpy
+requests
+boto3
+botocore
+s3fs
+networkx
+rasterio
+shapely
+pyproj
+tiletanic
+canvas
