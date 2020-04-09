@@ -37,5 +37,9 @@ class Relation(OSMElement):
     _type = "relation"
 
 
+@dataclasses.dataclass
+class BaseQuery:
+    elements: typing.typing.List[OSMElement]
+    tags: str
 
 
