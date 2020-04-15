@@ -19,7 +19,7 @@ import rasterio
 from rasterio.plot import show as rashow
 import shapely.ops as ops
 import shapely.geometry as geom
-from pyproj import CRS, Proj, Trnsformer
+from pyproj import CRS, Proj, Transformer
 
 import tiletanic as tt
 import canvas
