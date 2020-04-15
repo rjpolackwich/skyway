@@ -24,6 +24,8 @@ from pyproj import CRS, Proj, Transformer
 import tiletanic as tt
 import canvas
 
+from .utils import itrreduce, to_gjson
+
 WORLD_CRS = CRS.from_epsg(4326)
 MAP_CRS = CRS.from_epsg(3857)
 
@@ -215,30 +217,7 @@ class CanvasClient(object):
 
 
 
-
-def itrreduce(fn, iterable, initializer=None):
-    it = iter(iterable)
-    if initializer is None:
-        value = next(it)
-    else:
-        value = initializer
-    for element in it:
-        value = fn([value, element])
-    return value
-
-
-def to_gjson(tile):
-    geodata = geom.mapping(t)
-    gj = {"type": "Feature",
-         "properties": {"tile_id": "+".join([str(t.utm_zone), t.quadkey]),
-                        "ix": t.xi,
-                        "iy": t.yi,
-                        "zoom": t.zoom},
-         "geometry": geodata}
-    return gj
-
-
-class CanvasZone(CanvasClient):
+class TileCollection(CanvasClient):
 
     def __init__(self, utm_zone, tiler=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -342,7 +321,7 @@ class CanvasCollection(CanvasClient):
         if zone not in self.canvas_zones():
             raise OSError("Zone {} not in path".format(zone))
         if zone in self._zlut: return self._zlut[zone]
-        self._zlut[zone] = CanvasZone(zone, bucket=self.bucket, local=self.local, s3conn=self.s3conn, tiler=self.tiler, **kwargs)
+        self._zlut[zone] = TileCollection(zone, bucket=self.bucket, local=self.local, s3conn=self.s3conn, tiler=self.tiler, **kwargs)
         return self._zlut[zone]
 
     def descriptions(self):
