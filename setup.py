@@ -15,6 +15,7 @@ setup(name="skyway",
       url="",
       license="MIT",
       packages=find_packages(exclude=['docs', 'tests']),
-      install_require=reqs
+      install_require=reqs,
+      python_requires='>3.7',
       )
 
