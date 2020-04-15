@@ -272,7 +272,7 @@ class TileCollection(CanvasClient):
         return self.tiler.tile_from_quadkey(quadkey)
 
     def __setitem__(self, item):
-        raise NotImeplementedError
+        raise NotImplementedError
 
     def __iter__(self):
         tiles = np.array([self.tiler._tiler.quadkey_to_tile(qk)
