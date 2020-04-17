@@ -91,36 +91,50 @@ class AugmentedDateDelta(DateDelta):
     _qname = "adiff"
 
 
+class EmptySetting():
+    def __repr__(self):
+        return ""
 
 
 
-
-@dataclasses.dataclass
-class QuerySettings:
-    payload_format: str
-    maxsize: int
-    timeout: int
-    datespec: typing.typing.Union[str, datetime.datetime]
+class QuerySettings():
+    payload_format: str = None
+    maxsize: int = None
+    timeout: int = None
+    datespec: typing.typing.Union[str, datetime.datetime] = None
     bbox: typing.typing.Sequence = dataclasses.field(default_factory=list)
 
+    def __init__(self,
+                 payload_format: str = None,
+                 maxsize: int = None,
+                 timeout: int = None,
+                 datespec: typing.typing.Union[str, datetime.datetime] = None,
+                 bbox: typing.typing.List = None):
 
-    def __post_init__(self):
-        pass
 
     def __repr__(self):
-        msg = list()
-        for k, v in dataclasses.asdict(self).items():
-            if v is not None:
-                msg.append(f'''{v}''')
-        return "".join(msg) + ";"
+        pass
 
-    @classmethod
-    def geom_settings(cls, date=None, bbox=None):
-        return cls("json", 1073741824, 360, date, bbox)
+    @property
+    def payload_format(self):
+        pass
 
-    @classmethod
-    def stats_settings(cls, date=None, bbox=None):
-        return cls("csv", 536870912, 360, date, bbox)
+    @property
+    def maxsize(self):
+        pass
+
+    @property
+    def timeout(self):
+        pass
+
+    @property
+    def datespec(self):
+        pass
+
+    @property
+    def bbox(self):
+        pass
+
 
 
 
