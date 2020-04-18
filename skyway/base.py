@@ -7,135 +7,112 @@ from dateutil.parser import parse as dateparse
 import requests
 
 
-class QueryBbox():
-    _qname = "bbox"
+class QueryMetaParam():
+    def __init_subclass__(cls, param_name, **kwargs):
+        super().__init_subclass__(**kwargs)
+        cls._param_name = param_name
 
+    @property
+    def _alias(self):
+        param = getattr(self, self.__class__._param_name)
+        return param
+
+    def __repr__(self):
+        if self._alias is not None:
+            return f'''[{self._param_name}:{self._fmt_param()}]'''
+        return ""
+
+    def _fmt_param(self):
+        return self._alias
+
+
+class QueryPayloadFormat(QueryMetaParam, param_name="out"):
+    def __init__(self, out):
+        self.out = out
+
+
+class QueryTimeout(QueryMetaParam, param_name="timeout"):
+    def __init__(self, timeout):
+        self.timeout = timeout
+
+
+class QueryBbox(QueryMetaParam, param_name="bbox"):
     def __init__(self, bbox: typing.typing.Sequence):
         self.bbox = bbox
 
-    def __repr__(self):
-        enc = ",".join(map(str, self.bbox))
-        return f'''[{self._qname}:{enc}]'''
-
-    @property
-    def bbox(self):
-        return [self.south,
-                self.west,
-                self.north,
-                self.east
-                ]
-
-    @bbox.setter
-    def bbox(self, bbox):
-        s, w, n, e = bbox
-        self.south = s
-        self.west = w
-        self.north = n
-        self.east = e
-
-class QueryTimeout():
-    _qname = "timeout"
-
-    def __init__(self, timeout=360):
-        self.timeout = timeout
-
-    def __repr__(self):
-        return f'''[{self._qname}:{self.timeout}]'''
+    def _fmt_param(self):
+        return ",".join(map(str, self.bbox))
 
 
-
-class QueryPayloadFormat():
-    _qname = "out"
-
-
-class FormatNotImplemented(QueryPayloadFormat):
-    def __init__(self, *args, **kwargs):
-        raise NotImplementedError
-
-
-class JSONPayload(QueryPayloadFormat):
-    def __repr__(self):
-        return f'''[{self._qname}:json]'''
-
-
-class CSVPayload(QueryPayloadFormat):
-    def __init__(self, fields=[]):
-        self.fields = fields
-
-    def __repr__(self):
-        return f'''[{self._qname}:csv()]''' # fix
-
-
-class XMLPayload(FormatNotImplemented): ...
-class CustomPayload(FormatNotImplemented): ...
-class PopupPayload(FormatNotImplemented): ...
-
-
-class QueryDate():
-    _qname = "date"
-
-    def __init__(self, date: typing.typing.Union[str, datetime.datetime] = None):
+class QueryDate(QueryMetaParam, param_name="date"):
+    def __init__(self, date, dqt="date"):
         if isinstance(date, str):
             date = dateparse(date)
-        assert isinstance(date, datetime.datetime)
-        self.date = date
+            assert isinstance(date, datetime.datetime)
+            self.date = date
 
-    def __repr__(self):
-        return f'''[{self._qname}:"{self.date.isoformat()}"]'''
+    def _fmt_param(self):
+        return self.date.isoformat()
 
-
-class DateDelta(QueryDate):
-    _qname = "diff"
-
-class AugmentedDateDelta(DateDelta):
-    _qname = "adiff"
-
-
-class EmptySetting():
-    def __repr__(self):
-        return ""
 
 
 
 class QuerySettings():
-    payload_format: str = None
-    maxsize: int = None
-    timeout: int = None
-    datespec: typing.typing.Union[str, datetime.datetime] = None
-    bbox: typing.typing.Sequence = dataclasses.field(default_factory=list)
-
     def __init__(self,
-                 payload_format: str = None,
-                 maxsize: int = None,
-                 timeout: int = None,
-                 datespec: typing.typing.Union[str, datetime.datetime] = None,
-                 bbox: typing.typing.List = None):
+                 payload_format=None,
+                 timeout=None,
+                 maxsize=None,
+                 date=None,
+                 bbox=None):
 
+        self._out = QueryPayloadFormat(payload_format)
+        self._timeout = QueryTimeout(timeout)
+        self._maxsize = QueryTimeout(maxsize)
+        self._date = QueryDate(date)
+        self._bbox = QueryBbox(bbox)
 
     def __repr__(self):
-        pass
+        s = (
+            f'''{self._out}'''
+            f'''{self._timeout}'''
+            f'''{self._maxsize}'''
+            f'''{self._date}'''
+            f'''{self._bbox}'''
+        )
+        if s != "":
+            s += ";"
+        return s
 
     @property
     def payload_format(self):
-        pass
+        return self._out.out
 
-    @property
-    def maxsize(self):
-        pass
+    @payload_format.setter
+    def payload_format(self, val):
+        self._out.out = val
 
     @property
     def timeout(self):
-        pass
+        return self._timeout.timeout
+
+    @timeout.setter
+    def timeout(self, val):
+        self._timeout.timeout = val
 
     @property
-    def datespec(self):
-        pass
+    def maxsize(self):
+        return self._maxsize.maxsize
+
+    @maxsize.setter
+    def maxsize(self, val):
+        self._maxsize.maxsize = val
 
     @property
     def bbox(self):
-        pass
+        return self._bbox.bbox
 
-
+    @bbox.setter(self, val):
+        self._bbox.bbox = val
 
 
 
