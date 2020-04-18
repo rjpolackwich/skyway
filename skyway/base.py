@@ -1,10 +1,5 @@
-import typing_extensions as typing
-import dataclasses
-import json
-import csv
 import datetime
 from dateutil.parser import parse as dateparse
-import requests
 
 
 class QueryMetaParam():
@@ -36,8 +31,13 @@ class QueryTimeout(QueryMetaParam, param_name="timeout"):
         self.timeout = timeout
 
 
+class QueryMaxsize(QueryMetaParam, param_name="maxsize"):
+    def __init__(self, maxsize):
+        self.maxsize = maxsize
+
+
 class QueryBbox(QueryMetaParam, param_name="bbox"):
-    def __init__(self, bbox: typing.typing.Sequence):
+    def __init__(self, bbox):
         self.bbox = bbox
 
     def _fmt_param(self):
@@ -46,14 +46,10 @@ class QueryBbox(QueryMetaParam, param_name="bbox"):
 
 class QueryDate(QueryMetaParam, param_name="date"):
     def __init__(self, date, dqt="date"):
-        if isinstance(date, str):
-            date = dateparse(date)
-            assert isinstance(date, datetime.datetime)
-            self.date = date
+        self.date = date
 
     def _fmt_param(self):
         return self.date.isoformat()
-
 
 
 
@@ -67,7 +63,7 @@ class QuerySettings():
 
         self._out = QueryPayloadFormat(payload_format)
         self._timeout = QueryTimeout(timeout)
-        self._maxsize = QueryTimeout(maxsize)
+        self._maxsize = QueryMaxsize(maxsize)
         self._date = QueryDate(date)
         self._bbox = QueryBbox(bbox)
 
@@ -111,23 +107,8 @@ class QuerySettings():
     def bbox(self):
         return self._bbox.bbox
 
-    @bbox.setter(self, val):
+    @bbox.setter
+    def bbox(self, val):
         self._bbox.bbox = val
-
-
-
-class OSMElement(): pass
-
-class Node(OSMElement):
-    _type = "node"
-
-
-class Way(OSMElement):
-    _type = "way"
-
-
-class Relation(OSMElement):
-    _type = "relation"
-
 
 
