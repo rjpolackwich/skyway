@@ -104,11 +104,20 @@ class QuerySettings():
         self._maxsize.maxsize = val
 
     @property
+    def date(self):
+        return self._date.date
+
+    @date.setter
+    def date(self, val):
+        self._date.date = val
+
+    @property
     def bbox(self):
         return self._bbox.bbox
 
     @bbox.setter
     def bbox(self, val):
         self._bbox.bbox = val
+
 
 
