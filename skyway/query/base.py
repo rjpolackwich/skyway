@@ -2,7 +2,7 @@ import datetime
 from dateutil.parser import parse as dateparse
 
 
-class QueryMetaParam():
+class BaseSetting:
     def __init_subclass__(cls, param_name, **kwargs):
         super().__init_subclass__(**kwargs)
         cls._param_name = param_name
@@ -21,39 +21,40 @@ class QueryMetaParam():
         return self._alias
 
 
-class QueryPayloadFormat(QueryMetaParam, param_name="out"):
+class PayloadFormat(BaseSetting, param_name="out"):
     def __init__(self, out):
         self.out = out
 
 
-class QueryTimeout(QueryMetaParam, param_name="timeout"):
+class Timeout(BaseSetting, param_name="timeout"):
     def __init__(self, timeout):
         self.timeout = timeout
 
 
-class QueryMaxsize(QueryMetaParam, param_name="maxsize"):
+class Maxsize(BaseSetting, param_name="maxsize"):
     def __init__(self, maxsize):
         self.maxsize = maxsize
 
 
-class QueryBbox(QueryMetaParam, param_name="bbox"):
+class Bbox(BaseSetting, param_name="bbox"):
     def __init__(self, bbox):
         self.bbox = bbox
 
     def _fmt_param(self):
-        return ",".join(map(str, self.bbox))
+        s, w, n, e = self.bbox
+        return f'''{s:.2f},{w:.2f},{n:.2f},{e:.2f}'''
 
 
-class QueryDate(QueryMetaParam, param_name="date"):
-    def __init__(self, date, dqt="date"):
+class Date(BaseSetting, param_name="date"):
+    def __init__(self, date):
         self.date = date
 
     def _fmt_param(self):
-        return self.date.isoformat()
+        return self.date.isoformat(timespec="seconds") + "Z"
 
 
 
-class QuerySettings():
+class QuerySettings:
     def __init__(self,
                  payload_format=None,
                  timeout=None,
@@ -61,11 +62,11 @@ class QuerySettings():
                  date=None,
                  bbox=None):
 
-        self._out = QueryPayloadFormat(payload_format)
-        self._timeout = QueryTimeout(timeout)
-        self._maxsize = QueryMaxsize(maxsize)
-        self._date = QueryDate(date)
-        self._bbox = QueryBbox(bbox)
+        self._out = PayloadFormat(payload_format)
+        self._timeout = Timeout(timeout)
+        self._maxsize = Maxsize(maxsize)
+        self._date = Date(date)
+        self._bbox = Bbox(bbox)
 
     def __repr__(self):
         s = (
@@ -118,6 +119,26 @@ class QuerySettings():
     @bbox.setter
     def bbox(self, val):
         self._bbox.bbox = val
+
+
+
+class ElementType: pass
+
+class Node(ElementType):
+    def __repr__(self):
+        return "node"
+
+class Way(ElementType):
+    def __repr__(self):
+        return "way"
+
+
+class Relation(ElementType):
+    def __repr__(self):
+        return "rel"
+
+
+
 
 
 
