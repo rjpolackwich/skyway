@@ -104,7 +104,7 @@ class GeoTile(object):
         if ccrs == self.__crs__ and to_crs == WORLD_CRS:
             tr = self._tr
         else:
-            tr = Transform.from_crs(ccrs, to_crs, always_xy=True).transform
+            tr = Transformer.from_crs(ccrs, to_crs, always_xy=True).transform
         self._gi = ops.transform(tr, geom.shape(self)).__geo_interface__
 
     toWGS84 = partialmethod(set_crs, WORLD_CRS)
