@@ -1,24 +1,7 @@
+from .base import BaseSettings
 import datetime
 from dateutil.parser import parse as dateparse
 
-
-class BaseSetting:
-    def __init_subclass__(cls, param_name, **kwargs):
-        super().__init_subclass__(**kwargs)
-        cls._param_name = param_name
-
-    @property
-    def _alias(self):
-        param = getattr(self, self.__class__._param_name)
-        return param
-
-    def __repr__(self):
-        if self._alias is not None:
-            return f'''[{self._param_name}:{self._fmt_param()}]'''
-        return ""
-
-    def _fmt_param(self):
-        return self._alias
 
 
 class PayloadFormat(BaseSetting, param_name="out"):
