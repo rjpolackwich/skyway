@@ -5,8 +5,6 @@ from dateutil.parser import parse as dateparse
 
 
 class ElementQuery:
-    _elmtype = ElementType
-
     def __init__(self, filters=None):
         self.filters = []
         self.query
@@ -26,7 +24,7 @@ class NWR(ElementQuery):
         return f'''nwr{self.filters};'''
 
 
-class QueryBuilder: pass
+class QueryBuilder:
     overpass_endpoint = 'http://overpass-api.de/api/interpreter'
     def __init__(self, name="default"):
         self.name = name
