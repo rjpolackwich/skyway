@@ -10,8 +10,8 @@ class Filter:
     def __add__(self, other):
         if isinstance(other, str):
             other = UserFilter(other)
-        if isinstance(other, BaseFilter):
-            return CompoundFilter(self, other)
+        if isinstance(other, Filter):
+            return CompoundFilter([self, other])
         if isinstance(other, CompoundFilter):
             filters = [f for f in other.filters]
             filters.append(self)
@@ -23,7 +23,7 @@ class Filter:
         return self.__add__(self, other)
 
     def __iadd__(self, other):
-        raise NotImplementedError
+        return self.__add__(other)
 
 
 class CompoundFilter:
@@ -81,6 +81,7 @@ class CompoundFilter:
 
     def __iadd__(self, other):
         self.add_filter(other)
+        return self
 
 
 class UserFilter(Filter):
@@ -103,7 +104,6 @@ class IdFilter(Filter):
     def id(self, val):
         self._id = val
 
-    @property
     def _fmt(self):
         return f'''(id:{self.id})'''
 
@@ -114,7 +114,7 @@ class BboxFilter(Filter):
 
     def _fmt(self):
         s, w, n, e = self.bbox
-        return f'''{s:.2f},{w:.2f},{n:.2f},{e:.2f}'''
+        return f'''({s:.2f},{w:.2f},{n:.2f},{e:.2f})'''
 
 
 class KeySpec:
@@ -156,7 +156,7 @@ class TagFilter(Filter):
             self._key = KeySpec(key, exists=exists)
         else:
             self._key = KeySpec(key)
-        self.vals = vals
+        self._vals = vals
         self.exists = exists
 
     @property
@@ -178,11 +178,11 @@ class TagFilter(Filter):
     def _fmt(self):
         if not self.key.exists:
             return f'''[{self.key}]'''
-        if not self.vals:
+        if not self.values:
             return f'''[{self.key}]'''
         svals = format_values(self.values)
         if self.exists:
-            return f'''{self.key}{svals}'''
+            return f'''[{self.key}{svals}]'''
         return f'''[{self.key}][{self.key}!{svals}]'''
 
 
