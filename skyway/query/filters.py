@@ -1,90 +1,9 @@
-import itertools
+from .base import Filter
 
-class Filter:
-    def _fmt(self):
-        raise NotImplementedError
+class GenericFilter(Filter):
+    pass
 
-    def __repr__(self):
-        return self._fmt()
-
-    def __add__(self, other):
-        if isinstance(other, str):
-            other = UserFilter(other)
-        if isinstance(other, Filter):
-            return CompoundFilter([self, other])
-        if isinstance(other, CompoundFilter):
-            filters = [f for f in other.filters]
-            filters.append(self)
-            return CompoundFilter(filters)
-        else:
-            raise NotImplementedError
-
-    def __radd__(self, other):
-        return self.__add__(self, other)
-
-    def __iadd__(self, other):
-        return self.__add__(other)
-
-
-class CompoundFilter:
-    def __init__(self, filters=[]):
-        self._filters = filters
-
-    @property
-    def filters(self):
-        return self._filters
-
-    @filters.setter
-    def filters(self, filters):
-        if not self._filters:
-            self._filters = filters
-        else:
-            raise AttributeError("Delete existing filters before assignment")
-
-    @filters.deleter
-    def filters(self):
-        self._filters = []
-
-    def __iter__(self):
-        return iter(self.filters)
-
-    def __repr__(self):
-        return f'''{"".join(f._fmt() for f in self.filters)}'''
-
-    def add_filter(self, other):
-        if isinstance(other, str):
-            other = UserFilter(other)
-        if isinstance(other, Filter):
-            self._filters.append(other)
-            return
-        if isinstance(other, CompoundFilter):
-            self._filters.extend(other.filters)
-            return
-        else:
-            raise NotImplementedError
-
-    def __add__(self, other):
-        if isinstance(other, str):
-            other = UserFilter(other)
-        if isinstance(other, Filter):
-            filters = [f for f in self.filters]
-            filters.append(other)
-            return CompoundFilter(filters)
-        if isinstance(other, CompoundFilter):
-            filters = list(itertools.chain(self.filters, other.filters))
-            return CompoundFilter(filters)
-        else:
-            raise NotImplementedError
-
-    def __radd__(self, other):
-        return self.__add__(other)
-
-    def __iadd__(self, other):
-        self.add_filter(other)
-        return self
-
-
-class UserFilter(Filter):
+class UserFilter(GenericFilter):
     def __init__(self, filterstring):
         self._fs = filterstring
 
@@ -92,7 +11,7 @@ class UserFilter(Filter):
         return self._fs
 
 
-class IdFilter(Filter):
+class IdFilter(GenericFilter):
     def __init__(self, _id):
         self._id = _id
 
@@ -108,7 +27,7 @@ class IdFilter(Filter):
         return f'''(id:{self.id})'''
 
 
-class BboxFilter(Filter):
+class BboxFilter(GenericFilter):
     def __init__(self, bbox):
         self.bbox = bbox
 
@@ -150,7 +69,7 @@ def format_values(vals):
             return f'''~"^({svals})$"'''
 
 
-class TagFilter(Filter):
+class TagFilter(GenericFilter):
     def __init__(self, key, vals=[], exists=True):
         if not vals:
             self._key = KeySpec(key, exists=exists)
